@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-//odwracanie pojedyńczego słowa(tablicy znaków)
+//reversing single word (array of chars)
 void odwroc_slowo(char str[], int start, int end)
 {
     if (end-start>30){
@@ -22,10 +21,10 @@ void odwroc_slowo(char str[], int start, int end)
 }
 
 
-/*odwracanie całego tekstu*/
+/*reversing whole text*/
 void odwroc_tekst(char str[]){
     int start = 0, end = 0;
-    /*odwracanie słowa jeśli zostanie wykryty znak końca słowa (znak z drugiej grupy)*/
+    /*reversing whole word if character from (2) group is detected*/
     while(str[end]){   
         for(end=start;str[end]&&str[end]!=' '&& str[end]!=','&& str[end]!='.'&& str[end]!='?' && str[end]!='\n';end++);
         odwroc_slowo(str, start, end-1);
@@ -36,8 +35,7 @@ void odwroc_tekst(char str[]){
 
 void koduj_linie(char str[], int k){
 	int j, len = strlen(str);
-    
-    /* szyfrowanie/odszyfrowywanie dużej litery*/
+    /*cyphering and decyphering capital letter*/
 	for (int i=j=0; i<len; i++){    
             
         if (str[i]>='A' && str[i]<='Z'){
@@ -48,8 +46,8 @@ void koduj_linie(char str[], int k){
 
            str[j++] = str[i];
         }
-
-        /*Sprawdzanie spacji, kropki, przecinka, znaku zapytania i znaku nowej linii jako znaków końca słowa */
+	
+	/* Checking space, period, coma, question mark and newline characters as end-of-the-word characters */
         else if (str[i]==' ' || str[i]=='.' || str[i]==',' || str[i]=='?' || str[i]=='\n'){
             str[j++] = str[i];
         }
@@ -57,7 +55,7 @@ void koduj_linie(char str[], int k){
     }
     str[j]='\0';
 
-    // odwracanie słów w całym tekście i wpisywanie ich do docelowego pliku
+    // reversing all words in the text and saving them to the output file
     odwroc_tekst(str);
 }
 
@@ -65,7 +63,7 @@ void koduj_linie(char str[], int k){
 void przetwarzanie(FILE* plik_in, FILE* plik_out, int k){
 	char* str;
     
-    // kodowanie tekstu linijka po linijce i wpisywanie go do docelowego pliku
+    // cyphering whole text line after line and writing them to the output file
     while (fscanf(plik_in, "%[^\n] ", str)!=EOF){
     	koduj_linie(str, k);
     	fprintf(plik_out, "%s\n", str);
@@ -81,10 +79,10 @@ FILE* wczytaj_input(char* input_file){
     	exit(5);
     	}
     
-    // otwieramy plik do odczytu 
+    // opening input file 
     plik_in = fopen(input_file, "r");
     
-    //sprawdzamy czy nie ma błędu w pliku do odczytu
+    // checking if input file does not contain errors
     if (plik_in == NULL){
 		printf("Błąd. Nie mogę otworzyć pliku do odczytu %s. Przerywam pracę.\n", input_file);
 		exit(3);
@@ -101,10 +99,10 @@ FILE* wczytaj_output(char* output_file){
     	printf("Podana nazwa pliku wyjściowego ma więcej niż 300 znaków, kończę pracę");
     	exit(6);
     	}
-	// otwieramy plik do zapisu
+	// opening output file 
 	plik_out = fopen(output_file, "w");
     
-    //sprawdzamy czy nie ma błędu w pliku do zapisu
+    // checking if output file does not contain errors
     if (plik_out == NULL){
 		printf("Błąd. Nie mogę otworzyć pliku do zapisu %s. Przerywam pracę.\n", output_file);
 		exit(4);
@@ -120,7 +118,7 @@ int main(void)
     FILE* plik_in;
     FILE* plik_out;
 
-    // przyjmowanie pliku wejściowego i tekstu w nim zawartego
+    // getting input file
     printf("To jest program szyfrujacy i deszyfrujacy tekst.\n");
     plik_in = wczytaj_input(input_file);
     plik_out = wczytaj_output(output_file);
@@ -140,7 +138,7 @@ int main(void)
         exit(8);
     }
 	
-	// szyfrowanie jest tą samą procedurą co kodowanie, ale z kluczem równym długości alfabetu zmniejszonym o ten klucz
+	// cyphering is the came function as cyphering, but he key is equal lenght of the alphabet minus key 
     if (choice == 1){
 	przetwarzanie(plik_in, plik_out, 26-k);
         }
