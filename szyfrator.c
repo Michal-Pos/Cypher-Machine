@@ -2,151 +2,130 @@
 #include <stdlib.h>
 #include <string.h>
 
-//reversing single word (array of chars)
-void odwroc_slowo(char str[], int start, int end)
-{
-    if (end-start>30){
-    	printf("Wczytany tekst zawiera słowo zawierające więcej niż 30 znaków, przerywam pracę \n");
-    	exit(2);
+// Function to reverse a single word (array of chars)
+void reverse_word(char str[], int start, int end) {
+    if (end - start > 30) {
+        printf("The input text contains a word with more than 30 characters, terminating the process \n");
+        exit(2);
     }
-    char temp; 
-    //start i end wymieniają się wartościami aż się nie spotkają w środku, co skutkuje odwróconą kolejnością liter
-    while(start<end){
-        temp=str[start];
-        str[start]=str[end];
-        str[end]=temp;
+    char temp;
+    // Swapping characters from both ends until they meet in the middle, resulting in reversed order of letters
+    while (start < end) {
+        temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
         start++;
         end--;
     }
 }
 
-
-/*reversing whole text*/
-void odwroc_tekst(char str[]){
+// Function to reverse the whole text
+void reverse_text(char str[]) {
     int start = 0, end = 0;
-    /*reversing whole word if character from (2) group is detected*/
-    while(str[end]){   
-        for(end=start;str[end]&&str[end]!=' '&& str[end]!=','&& str[end]!='.'&& str[end]!='?' && str[end]!='\n';end++);
-        odwroc_slowo(str, start, end-1);
-        start=end+1;
+    // Reversing whole word if a character from the (2) group is detected
+    while (str[end]) {
+        for (end = start; str[end] && str[end] != ' ' && str[end] != ',' && str[end] != '.' && str[end] != '?' && str[end] != '\n'; end++);
+        reverse_word(str, start, end - 1);
+        start = end + 1;
     }
 }
 
-
-void koduj_linie(char str[], int k){
-	int j, len = strlen(str);
-    /*cyphering and decyphering capital letter*/
-	for (int i=j=0; i<len; i++){    
-            
-        if (str[i]>='A' && str[i]<='Z'){
-           str[i] +=k;
-           if (str[i]>'Z'){
+// Function to encode a line of text
+void encode_line(char str[], int k) {
+    int j, len = strlen(str);
+    // Ciphering and deciphering capital letters
+    for (int i = j = 0; i < len; i++) {
+        if (str[i] >= 'A' && str[i] <= 'Z') {
+            str[i] += k;
+            if (str[i] > 'Z') {
                 str[i] -= 26;
-           }
-
-           str[j++] = str[i];
-        }
-	
-	/* Checking space, period, coma, question mark and newline characters as end-of-the-word characters */
-        else if (str[i]==' ' || str[i]=='.' || str[i]==',' || str[i]=='?' || str[i]=='\n'){
+            }
+            str[j++] = str[i];
+        } else if (str[i] == ' ' || str[i] == '.' || str[i] == ',' || str[i] == '?' || str[i] == '\n') {
             str[j++] = str[i];
         }
-
     }
-    str[j]='\0';
-
-    // reversing all words in the text and saving them to the output file
-    odwroc_tekst(str);
+    str[j] = '\0';
+    // Reversing all words in the text
+    reverse_text(str);
 }
 
-
-void przetwarzanie(FILE* plik_in, FILE* plik_out, int k){
-	char* str;
-    
-    // cyphering whole text line after line and writing them to the output file
-    while (fscanf(plik_in, "%[^\n] ", str)!=EOF){
-    	koduj_linie(str, k);
-    	fprintf(plik_out, "%s\n", str);
+// Function to process the input file line by line
+void process(FILE* input_file, FILE* output_file, int k) {
+    char str[1000]; // Assuming a maximum line length of 1000 characters
+    while (fgets(str, sizeof(str), input_file) != NULL) {
+        encode_line(str, k);
+        fprintf(output_file, "%s", str);
     }
 }
-FILE* wczytaj_input(char* input_file){
-	FILE* plik_in;
-	printf("Wpisz nazwe pliku wejsciowego, pamiętaj o dodaniu odpowiedniego rozszerzenia: \n");
-	scanf("%s", input_file);
-    
-    if (strlen(input_file)>300){
-    	printf("Podana nazwa pliku wejściowego ma więcej niż 300 znaków, kończę pracę");
-    	exit(5);
-    	}
-    
-    // opening input file 
-    plik_in = fopen(input_file, "r");
-    
-    // checking if input file does not contain errors
-    if (plik_in == NULL){
-		printf("Błąd. Nie mogę otworzyć pliku do odczytu %s. Przerywam pracę.\n", input_file);
-		exit(3);
-	return plik_in;
-	}  
+
+// Function to read the input file
+FILE* read_input(char* input_file) {
+    FILE* file;
+    printf("Enter the input file name, remember to add the appropriate extension: \n");
+    fgets(input_file, 300, stdin);
+    input_file[strcspn(input_file, "\n")] = 0; // Removing the newline character from the input
+    if (strlen(input_file) > 300) {
+        printf("The input file name exceeds 300 characters, terminating the process");
+        exit(5);
+    }
+    file = fopen(input_file, "r");
+    if (file == NULL) {
+        printf("Error. Can't open the file for reading: %s. Terminating the process.\n", input_file);
+        exit(3);
+    }
+    return file;
 }
 
-
-FILE* wczytaj_output(char* output_file){
-	FILE* plik_out;
-	printf("Wpisz nazwe pliku wyjsciowego: \n");
-    scanf("%s", output_file);
-    if (strlen(output_file)>300){
-    	printf("Podana nazwa pliku wyjściowego ma więcej niż 300 znaków, kończę pracę");
-    	exit(6);
-    	}
-	// opening output file 
-	plik_out = fopen(output_file, "w");
-    
-    // checking if output file does not contain errors
-    if (plik_out == NULL){
-		printf("Błąd. Nie mogę otworzyć pliku do zapisu %s. Przerywam pracę.\n", output_file);
-		exit(4);
-		}
-	return plik_out;
+// Function to read the output file
+FILE* read_output(char* output_file) {
+    FILE* file;
+    printf("Enter the output file name: \n");
+    fgets(output_file, 300, stdin);
+    output_file[strcspn(output_file, "\n")] = 0; // Removing the newline character from the input
+    if (strlen(output_file) > 300) {
+        printf("The output file name exceeds 300 characters, terminating the process");
+        exit(6);
     }
+    file = fopen(output_file, "w");
+    if (file == NULL) {
+        printf("Error. Can't open the file for writing: %s. Terminating the process.\n", output_file);
+        exit(4);
+    }
+    return file;
+}
 
-
-int main(void)
-{
+int main(void) {
     char input_file[300], output_file[300];
     int choice, k;
-    FILE* plik_in;
-    FILE* plik_out;
+    FILE* input;
+    FILE* output;
 
-    // getting input file
-    printf("To jest program szyfrujacy i deszyfrujacy tekst.\n");
-    plik_in = wczytaj_input(input_file);
-    plik_out = wczytaj_output(output_file);
-    
+    printf("This is a program for encrypting and decrypting text.\n");
+    input = read_input(input_file);
+    output = read_output(output_file);
 
-    printf("Wybierz odszyfrowanie lub szyfrowanie [1/2]: \n" );
+    printf("Choose decryption or encryption [1/2]: \n");
     scanf("%d", &choice);
-    
-    if (choice!=1 && choice!=2){
-    	printf("Nie wybrano zadnej operacji, przerywam prace \n");
-            exit(7);
+
+    if (choice != 1 && choice != 2) {
+        printf("No operation selected, terminating the process \n");
+        exit(7);
     }
-    printf("Podaj klucz jakiego chcesz użyć, musi sie on byc niemniejszy niż od 0 i niewiększy niż 25 \n");
+    printf("Enter the key you want to use, it must be greater than or equal to 0 and less than 25 \n");
     scanf("%d", &k);
-    if ((k<0) || (k>25)){
-        printf("Klucz nie mieści sie w wymaganym przedziale, koncze prace \n");
+    if ((k < 0) || (k > 25)) {
+        printf("The key is out of the required range, terminating the process \n");
         exit(8);
     }
-	
-	// cyphering is the came function as cyphering, but he key is equal lenght of the alphabet minus key 
-    if (choice == 1){
-	przetwarzanie(plik_in, plik_out, 26-k);
-        }
-    else{
-	przetwarzanie(plik_in, plik_out, k);            
-        }
-    // zamykamy pliki
-    fclose(plik_in); 
-    fclose(plik_out);
+// decyphering is the came function as cyphering, but the argument is equal to lenght of the alphabet minus value of the key 
+    if (choice == 1) {
+        process(input, output, 26 - k);
+    } else {
+        process(input, output, k);
+    }
+
+    fclose(input);
+    fclose(output);
     return 0;
 }
